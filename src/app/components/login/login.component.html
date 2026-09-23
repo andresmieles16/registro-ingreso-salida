@@ -1,0 +1,129 @@
+<div class="login-wrapper">
+
+  <div class="login-left">
+    <div class="login-left-content">
+      <mat-icon class="big-icon">security</mat-icon>
+      <h1>Control de Acceso</h1>
+      <p>Sistema de registro de ingreso y salida de personas y vehículos</p>
+      <div class="features">
+        <div class="feature">
+          <mat-icon>face_retouching_natural</mat-icon>
+          <span>Reconocimiento Facial</span>
+        </div>
+        <div class="feature">
+          <mat-icon>directions_car</mat-icon>
+          <span>Control de Vehículos</span>
+        </div>
+        <div class="feature">
+          <mat-icon>apartment</mat-icon>
+          <span>Multi-Edificio</span>
+        </div>
+        <div class="feature">
+          <mat-icon>picture_as_pdf</mat-icon>
+          <span>Reportes PDF y Excel</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-right">
+    <mat-card class="login-card">
+      <mat-card-content>
+
+        <!-- Logo -->
+        <div class="login-logo">
+          <mat-icon>lock</mat-icon>
+        </div>
+
+        <h2 class="login-title">Iniciar Sesion</h2>
+        <p class="login-subtitle">Ingresa tus credenciales para continuar</p>
+
+        <form [formGroup]="formulario" (ngSubmit)="onSubmit()">
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Correo Electronico</mat-label>
+            <input matInput formControlName="email"
+                   type="email"
+                   placeholder="correo@ejemplo.com">
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="tieneError('email', 'required')">
+              El correo es obligatorio
+            </mat-error>
+            <mat-error *ngIf="tieneError('email', 'email')">
+              Correo no valido
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Contraseña</mat-label>
+            <input matInput formControlName="password"
+                   [type]="verPassword ? 'text' : 'password'"
+                   placeholder="Tu contraseña">
+            <button matSuffix mat-icon-button type="button"
+                    (click)="verPassword = !verPassword">
+              <mat-icon>
+                {{ verPassword ? 'visibility_off' : 'visibility' }}
+              </mat-icon>
+            </button>
+            <mat-error *ngIf="tieneError('password', 'required')">
+              La contraseña es obligatoria
+            </mat-error>
+            <mat-error *ngIf="tieneError('password', 'minlength')">
+              Minimo 6 caracteres
+            </mat-error>
+          </mat-form-field>
+
+          <!-- OLVIDASTE CONTRASEÑA -->
+          <div class="forgot-row">
+            <button type="button"
+                    mat-button
+                    class="btn-forgot"
+                    (click)="olvidastePassword()"
+                    [disabled]="enviandoReset">
+              <mat-spinner *ngIf="enviandoReset"
+                           diameter="14"
+                           style="display:inline-block; margin-right:4px;">
+              </mat-spinner>
+              <mat-icon *ngIf="!enviandoReset"
+                        style="font-size:14px; width:14px; height:14px;
+                               vertical-align:middle; margin-right:4px;">
+                lock_reset
+              </mat-icon>
+              {{ enviandoReset ? 'Enviando...' : '¿Olvidaste tu contraseña?' }}
+            </button>
+          </div>
+
+          <!-- BOTON LOGIN -->
+          <button type="submit"
+                  mat-raised-button
+                  color="primary"
+                  class="btn-login"
+                  [disabled]="cargando">
+            <mat-spinner *ngIf="cargando" diameter="20"
+                         style="display:inline-block; margin-right:8px;">
+            </mat-spinner>
+            <mat-icon *ngIf="!cargando">login</mat-icon>
+            {{ cargando ? 'Iniciando sesion...' : 'Iniciar Sesion' }}
+          </button>
+
+        </form>
+
+        <!-- HABEAS DATA -->
+        <div class="habeas-row">
+          <mat-icon style="font-size:14px; width:14px; height:14px; color:#999;">
+            gavel
+          </mat-icon>
+          <span>Al iniciar sesion aceptas nuestra</span>
+          <button type="button"
+                  mat-button
+                  class="btn-habeas"
+                  (click)="abrirHabeasData()">
+            Política de Tratamiento de Datos y Habeas Data
+          </button>
+        </div>
+
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+</div>

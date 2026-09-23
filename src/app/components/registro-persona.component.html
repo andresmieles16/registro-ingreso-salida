@@ -1,0 +1,230 @@
+<div class="form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-icon mat-card-avatar>person_add</mat-icon>
+      <mat-card-title>Registrar Ingreso de Persona</mat-card-title>
+      <mat-card-subtitle>
+        Identifica por cara para registro automatico, o completa el formulario manualmente
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="formulario" (ngSubmit)="onSubmit()">
+
+        <!-- ============================================ -->
+        <!-- SECCION 1: RECONOCIMIENTO FACIAL             -->
+        <!-- ============================================ -->
+        <div class="seccion-reconocimiento">
+          <div class="seccion-titulo">
+            <mat-icon>face</mat-icon>
+            <span>Identificacion Facial Automatica</span>
+          </div>
+          <p class="seccion-desc">
+            Si la persona ya fue registrada antes, el sistema la identifica
+            y registra automaticamente sin necesidad de llenar el formulario.
+          </p>
+
+          <button type="button" mat-raised-button color="primary"
+                  (click)="activarReconocimiento()"
+                  [disabled]="reconociendo"
+                  class="btn-reconocimiento">
+            <mat-icon>face_retouching_natural</mat-icon>
+            Identificar por Reconocimiento Facial
+          </button>
+
+          <!-- Camara reconocimiento -->
+          <div *ngIf="modoReconocimiento" class="camara-bloque">
+            <div class="camara-bloque-header">
+              <mat-icon style="color:#1565c0">tips_and_updates</mat-icon>
+              <span>Centra el rostro en el circulo y presiona el boton</span>
+              <button type="button" mat-icon-button
+                      (click)="modoReconocimiento = false">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <app-camara
+              [modoReconocimiento]="true"
+              (fotoCaptada)="onFotoParaReconocimiento($event)">
+            </app-camara>
+          </div>
+
+          <!-- Procesando -->
+          <div *ngIf="reconociendo" class="reconociendo-msg">
+            <mat-spinner diameter="28"></mat-spinner>
+            <span>Buscando en la base de datos...</span>
+          </div>
+
+        </div>
+
+        <!-- ALERTA PERSONA YA ESTA ADENTRO -->
+        <div *ngIf="yaEstaAdentro" class="alert-adentro">
+          <mat-icon>warning</mat-icon>
+          <div>
+            <strong>Persona ya registrada</strong>
+            <p>
+              Esta persona ya se encuentra dentro de las instalaciones.
+              Debe registrar su salida antes de volver a ingresar.
+            </p>
+          </div>
+        </div>
+
+        <div class="separador-seccion">
+          <span>O registra manualmente</span>
+        </div>
+
+        <!-- ============================================ -->
+        <!-- SECCION 2: FORMULARIO MANUAL                 -->
+        <!-- ============================================ -->
+
+        <div class="busqueda-cedula">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Tipo de Documento *</mat-label>
+            <mat-select formControlName="tipoDocumento">
+              <mat-option *ngFor="let tipo of tiposDocumento" [value]="tipo">
+                {{ tipo }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Numero de Documento *</mat-label>
+            <input matInput
+                   formControlName="documento"
+                   placeholder="Ingresa la cedula y presiona Tab"
+                   (blur)="buscarPorCedula()">
+            <mat-icon matSuffix>badge</mat-icon>
+            <mat-spinner *ngIf="buscando" diameter="20"
+                         style="position:absolute; right:8px; top:12px">
+            </mat-spinner>
+            <mat-error *ngIf="tieneError('documento', 'required')">
+              El documento es obligatorio
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Alerta datos encontrados -->
+        <div *ngIf="encontrado && !yaEstaAdentro" class="alert-found">
+          <mat-icon>check_circle</mat-icon>
+          <span>Datos cargados automaticamente desde la base de datos</span>
+        </div>
+
+        <!-- Nombres y apellidos -->
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Nombres *</mat-label>
+            <input matInput formControlName="nombres"
+                   placeholder="Ej: Juan Carlos">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="tieneError('nombres', 'required')">
+              El nombre es obligatorio
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Apellidos *</mat-label>
+            <input matInput formControlName="apellidos"
+                   placeholder="Ej: Rodriguez Perez">
+            <mat-error *ngIf="tieneError('apellidos', 'required')">
+              Los apellidos son obligatorios
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Empresa / Entidad que visita</mat-label>
+          <input matInput formControlName="empresa" placeholder="Opcional">
+          <mat-icon matSuffix>business</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Motivo de Visita </mat-label>
+          <input matInput formControlName="motivo"
+                 placeholder="Ej: Reunion de trabajo">
+          <mat-error *ngIf="tieneError('motivo', 'required')">
+            El motivo es obligatorio
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Observaciones</mat-label>
+          <textarea matInput formControlName="observaciones" rows="3"></textarea>
+        </mat-form-field>
+
+        <!-- ============================================ -->
+        <!-- SECCION 3: FOTO OBLIGATORIA                  -->
+        <!-- ============================================ -->
+        <div class="foto-section" [class.foto-requerida]="!fotoRegistro">
+
+          <div class="foto-section-header">
+            <h4>
+              <mat-icon>camera_alt</mat-icon>
+              Foto del Visitante
+              <span class="foto-requerida-badge" *ngIf="!fotoRegistro">
+                * Obligatoria
+              </span>
+            </h4>
+            <button type="button" mat-stroked-button color="primary"
+                    *ngIf="!fotoRegistro && !modoCamara"
+                    (click)="abrirCamaraFoto()">
+              <mat-icon>camera_alt</mat-icon> Tomar Foto
+            </button>
+          </div>
+
+          <!-- Aviso foto requerida -->
+          <div *ngIf="!fotoRegistro && !modoCamara" class="aviso-foto">
+            <mat-icon>info_outline</mat-icon>
+            <span>
+              La foto es obligatoria. No podras registrar el ingreso sin ella.
+            </span>
+          </div>
+
+          <!-- Camara para tomar foto -->
+          <div *ngIf="modoCamara && !fotoRegistro" class="camara-bloque">
+            <div class="camara-bloque-header">
+              <mat-icon style="color:#1565c0">camera_alt</mat-icon>
+              <span>Centra el rostro y presiona el boton para tomar la foto</span>
+              <button type="button" mat-icon-button
+                      (click)="modoCamara = false">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+            <app-camara
+              [modoReconocimiento]="false"
+              (fotoCaptada)="onFotoRegistroCaptada($event)">
+            </app-camara>
+          </div>
+
+          <!-- Foto capturada -->
+          <div *ngIf="fotoRegistro" class="foto-actual">
+            <img [src]="fotoRegistro" alt="Foto" class="foto-thumb">
+            <div>
+              <div class="foto-ok">
+                <mat-icon>check_circle</mat-icon>
+                <span>Foto lista para el registro</span>
+              </div>
+              <button type="button" mat-stroked-button color="warn"
+                      style="margin-top:8px"
+                      (click)="fotoRegistro = null; modoCamara = false">
+                <mat-icon>refresh</mat-icon> Tomar otra foto
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- BOTONES -->
+        <div class="button-row">
+          <button type="button" mat-stroked-button
+                  (click)="limpiarFormulario()"
+                  [disabled]="reconociendo">
+            <mat-icon>clear</mat-icon> Limpiar
+          </button>
+          <button type="submit" mat-raised-button color="primary"
+                  [disabled]="reconociendo || yaEstaAdentro">
+            <mat-icon>check_circle</mat-icon> Registrar Ingreso
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

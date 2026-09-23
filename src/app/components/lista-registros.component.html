@@ -1,0 +1,234 @@
+<div class="lista-container">
+
+  <div class="header-row">
+    <h2><mat-icon>group</mat-icon> Actualmente Dentro</h2>
+    <span class="badge-total">{{ svc.registrosDentro().length }} total</span>
+  </div>
+
+  <div class="acciones-row">
+    <mat-form-field appearance="outline" class="buscador">
+      <mat-label>Buscar por nombre, placa, documento...</mat-label>
+      <input matInput
+             [value]="terminoBusqueda()"
+             (input)="onBuscar($event)"
+             placeholder="Escribe para filtrar...">
+      <mat-icon matPrefix>search</mat-icon>
+      <button *ngIf="terminoBusqueda()"
+              matSuffix mat-icon-button
+              (click)="limpiarBusqueda()"
+              matTooltip="Limpiar busqueda">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+
+    <button mat-raised-button
+            class="btn-salida-facial"
+            (click)="activarSalidaFacial()"
+            [disabled]="reconociendoSalida || esAdminNoSuper()"
+            [matTooltip]="esAdminNoSuper() ?
+              'No tienes permiso para esta accion' :
+              'Registrar salida identificando el rostro'">
+      <mat-icon>face_retouching_natural</mat-icon>
+      Salida por Reconocimiento Facial
+      <span *ngIf="esAdminNoSuper()" class="lock-icon">🔒</span>
+    </button>
+  </div>
+
+  <p class="contador-resultados" *ngIf="terminoBusqueda()">
+    <mat-icon>filter_list</mat-icon>
+    {{ registrosFiltrados().length }} resultado(s) para
+    <strong>"{{ terminoBusqueda() }}"</strong>
+  </p>
+
+  <div *ngIf="modoSalidaFacial" class="camara-salida-bloque">
+    <div class="camara-salida-header">
+      <mat-icon style="color:#c62828">face_retouching_natural</mat-icon>
+      <span>Centra el rostro de la persona que desea salir</span>
+      <button mat-icon-button (click)="modoSalidaFacial = false">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <app-camara
+      [modoReconocimiento]="true"
+      (fotoCaptada)="onFotoParaSalida($event)">
+    </app-camara>
+  </div>
+
+  <div *ngIf="reconociendoSalida && !modalVisible" class="reconociendo-msg">
+    <mat-spinner diameter="28"></mat-spinner>
+    <span>Identificando persona y registrando salida...</span>
+  </div>
+
+  <table mat-table [dataSource]="registrosFiltrados()" class="tabla">
+
+    <ng-container matColumnDef="foto">
+      <th mat-header-cell *matHeaderCellDef>Foto</th>
+      <td mat-cell *matCellDef="let r">
+        <img *ngIf="r.foto" [src]="r.foto" alt="Foto"
+             style="width:40px;height:40px;border-radius:50%;
+                    object-fit:cover;border:2px solid #1565c0;margin:4px 0;">
+        <mat-icon *ngIf="!r.foto"
+                  style="color:#ccc;font-size:40px;width:40px;height:40px;">
+          account_circle
+        </mat-icon>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="tipo">
+      <th mat-header-cell *matHeaderCellDef>Tipo</th>
+      <td mat-cell *matCellDef="let r">
+        <mat-chip [color]="r.tipo === 'persona' ? 'primary' : 'accent'" highlighted>
+          <mat-icon>{{ r.tipo === 'persona' ? 'person' : 'directions_car' }}</mat-icon>
+          {{ r.tipo | titlecase }}
+        </mat-chip>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="nombre">
+      <th mat-header-cell *matHeaderCellDef>Nombre / Placa</th>
+      <td mat-cell *matCellDef="let r">
+        <strong>{{ getNombre(r) }}</strong>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="identificacion">
+      <th mat-header-cell *matHeaderCellDef>Documento / Conductor</th>
+      <td mat-cell *matCellDef="let r">{{ getDoc(r) }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="edificio">
+      <th mat-header-cell *matHeaderCellDef>Edificio</th>
+      <td mat-cell *matCellDef="let r">
+        <span class="badge-edificio">
+          <mat-icon style="font-size:14px;width:14px;height:14px;">apartment</mat-icon>
+          {{ getNombreEdificio(r) }}
+        </span>
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="motivo">
+      <th mat-header-cell *matHeaderCellDef>Motivo</th>
+      <td mat-cell *matCellDef="let r">{{ r.motivo }}</td>
+    </ng-container>
+
+    <ng-container matColumnDef="horaIngreso">
+      <th mat-header-cell *matHeaderCellDef>Ingreso</th>
+      <td mat-cell *matCellDef="let r">
+        {{ r.horaIngreso | date:'HH:mm dd/MM' }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="acciones">
+      <th mat-header-cell *matHeaderCellDef>Accion</th>
+      <td mat-cell *matCellDef="let r">
+        <button mat-raised-button color="warn"
+                (click)="registrarSalida(r.id, getNombre(r))"
+                [disabled]="esAdminNoSuper()"
+                [matTooltip]="esAdminNoSuper() ?
+                  'No tienes permiso para esta accion' :
+                  'Registrar salida manual'">
+          <mat-icon>exit_to_app</mat-icon> Salida
+          <span *ngIf="esAdminNoSuper()" class="lock-icon">🔒</span>
+        </button>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+    <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell empty-msg" [attr.colspan]="columnas.length">
+        <mat-icon>people_outline</mat-icon>
+        <p *ngIf="!terminoBusqueda()">No hay nadie dentro en este momento</p>
+        <p *ngIf="terminoBusqueda()">
+          No se encontraron resultados para
+          <strong>"{{ terminoBusqueda() }}"</strong>
+        </p>
+      </td>
+    </tr>
+
+  </table>
+
+</div>
+
+<!-- ===================== MODAL RECONOCIMIENTO FACIAL ===================== -->
+<div class="modal-overlay" *ngIf="modalVisible" (click)="cerrarModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+
+    <!-- Cabecera -->
+    <div class="modal-header"
+         [class.modal-header--identificando]="modalEstado === 'identificando'"
+         [class.modal-header--exito]="modalEstado === 'exito'"
+         [class.modal-header--error]="modalEstado === 'error'"
+         [class.modal-header--no-encontrado]="modalEstado === 'noEncontrado'">
+
+      <div class="modal-estado-icono">
+        <mat-spinner *ngIf="modalEstado === 'identificando'" diameter="32" color="accent"></mat-spinner>
+        <mat-icon *ngIf="modalEstado === 'exito'">check_circle</mat-icon>
+        <mat-icon *ngIf="modalEstado === 'error'">error</mat-icon>
+        <mat-icon *ngIf="modalEstado === 'noEncontrado'">person_off</mat-icon>
+      </div>
+
+      <span class="modal-estado-label">
+        <ng-container [ngSwitch]="modalEstado">
+          <span *ngSwitchCase="'identificando'">Identificando...</span>
+          <span *ngSwitchCase="'exito'">Salida Registrada</span>
+          <span *ngSwitchCase="'error'">Error</span>
+          <span *ngSwitchCase="'noEncontrado'">No Encontrado</span>
+        </ng-container>
+      </span>
+
+      <button mat-icon-button class="modal-close-btn" (click)="cerrarModal()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Foto -->
+    <div class="modal-foto-wrap" *ngIf="modalFoto">
+      <img [src]="modalFoto" alt="Foto capturada" class="modal-foto"
+           [class.foto-identificando]="modalEstado === 'identificando'"
+           [class.foto-exito]="modalEstado === 'exito'"
+           [class.foto-error]="modalEstado === 'error'"
+           [class.foto-no-encontrado]="modalEstado === 'noEncontrado'">
+      <div class="modal-foto-badge"
+           [class.badge--identificando]="modalEstado === 'identificando'"
+           [class.badge--exito]="modalEstado === 'exito'"
+           [class.badge--error]="modalEstado === 'error'"
+           [class.badge--no-encontrado]="modalEstado === 'noEncontrado'">
+        <mat-icon *ngIf="modalEstado === 'identificando'" style="font-size:16px;width:16px;height:16px;">face_retouching_natural</mat-icon>
+        <mat-icon *ngIf="modalEstado === 'exito'"         style="font-size:16px;width:16px;height:16px;">check</mat-icon>
+        <mat-icon *ngIf="modalEstado === 'error'"         style="font-size:16px;width:16px;height:16px;">close</mat-icon>
+        <mat-icon *ngIf="modalEstado === 'noEncontrado'"  style="font-size:16px;width:16px;height:16px;">person_off</mat-icon>
+      </div>
+    </div>
+
+    <!-- Nombre -->
+    <p class="modal-nombre" *ngIf="modalNombre">{{ modalNombre }}</p>
+
+    <!-- Mensaje -->
+    <div class="modal-mensaje-wrap"
+         [class.msg-wrap--identificando]="modalEstado === 'identificando'"
+         [class.msg-wrap--exito]="modalEstado === 'exito'"
+         [class.msg-wrap--error]="modalEstado === 'error'"
+         [class.msg-wrap--no-encontrado]="modalEstado === 'noEncontrado'">
+      <mat-icon class="modal-mensaje-icono">
+        <ng-container [ngSwitch]="modalEstado">
+          <span *ngSwitchCase="'identificando'">info</span>
+          <span *ngSwitchCase="'exito'">check_circle_outline</span>
+          <span *ngSwitchCase="'error'">warning_amber</span>
+          <span *ngSwitchCase="'noEncontrado'">no_accounts</span>
+        </ng-container>
+      </mat-icon>
+      <p class="modal-mensaje">{{ modalMensaje }}</p>
+    </div>
+
+    <!-- Botón cerrar -->
+    <button mat-stroked-button class="modal-btn-cerrar"
+            [class.btn-cerrar--exito]="modalEstado === 'exito'"
+            [class.btn-cerrar--error]="modalEstado === 'error' || modalEstado === 'noEncontrado'"
+            (click)="cerrarModal()">
+      Cerrar
+    </button>
+
+  </div>
+</div>

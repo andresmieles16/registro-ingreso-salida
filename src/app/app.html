@@ -1,0 +1,184 @@
+<ng-container *ngIf="authService.isLoggedIn(); else soloContenido">
+  <mat-sidenav-container class="sidenav-container" autosize="false">
+
+    <mat-sidenav #drawer
+                 mode="side"
+                 opened
+                 class="sidenav"
+                 fixedInViewport="true"
+                 fixedTopGap="0"
+                 fixedBottomGap="0">
+
+      <!-- ENCABEZADO -->
+      <div class="sidenav-header">
+        <mat-icon class="logo-icon">security</mat-icon>
+        <span class="app-name">Control de Acceso</span>
+      </div>
+
+      <!-- INFO USUARIO -->
+      <div class="user-info">
+        <mat-icon>account_circle</mat-icon>
+        <div>
+          <p class="user-name">{{ authService.usuarioActual()?.nombre }}</p>
+          <p class="user-rol">{{ authService.usuarioActual()?.rol | titlecase }}</p>
+          <p class="user-edificio"
+             *ngIf="!authService.isSuperAdmin() &&
+                    authService.edificiosDisponibles().length <= 1">
+            <mat-icon style="font-size:12px; width:12px; height:12px;">
+              apartment
+            </mat-icon>
+            {{ edificioService.getNombreEdificio(authService.edificioId() || '') }}
+          </p>
+          <p class="user-edificio" *ngIf="authService.isSuperAdmin()">
+            <mat-icon style="font-size:12px; width:12px; height:12px;">stars</mat-icon>
+            Todos los edificios
+          </p>
+        </div>
+      </div>
+
+      <!-- SELECTOR DE EDIFICIO para admins con multiples edificios -->
+      <div class="selector-edificio"
+           *ngIf="authService.isAdmin() &&
+                  !authService.isSuperAdmin() &&
+                  authService.edificiosDisponibles().length > 1">
+        <p class="selector-edificio-label">
+          <mat-icon style="font-size:14px; width:14px; height:14px;">
+            apartment
+          </mat-icon>
+          Edificio activo:
+        </p>
+        <mat-select
+          [value]="authService.edificioId()"
+          (selectionChange)="authService.seleccionarEdificio($event.value)"
+          class="selector-edificio-select">
+          <mat-option
+            *ngFor="let id of authService.edificiosDisponibles()"
+            [value]="id">
+            {{ edificioService.getNombreEdificio(id) }}
+          </mat-option>
+        </mat-select>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- MENU PRINCIPAL -->
+      <mat-nav-list>
+
+        <a mat-list-item
+           routerLink="/dashboard"
+           routerLinkActive="active-link">
+          <mat-icon matListItemIcon>dashboard</mat-icon>
+          <span matListItemTitle>Dashboard</span>
+        </a>
+
+        <a mat-list-item
+           [routerLink]="esAdminNoSuper() ? null : '/registro-persona'"
+           routerLinkActive="active-link"
+           [class.menu-disabled]="esAdminNoSuper()"
+           [matTooltip]="esAdminNoSuper() ? 'No tienes permiso para esta accion' : ''"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>person_add</mat-icon>
+          <span matListItemTitle>
+            Registrar Persona
+            <span *ngIf="esAdminNoSuper()" class="lock-icon">🔒</span>
+          </span>
+        </a>
+
+        <a mat-list-item
+           [routerLink]="esAdminNoSuper() ? null : '/registro-vehiculo'"
+           routerLinkActive="active-link"
+           [class.menu-disabled]="esAdminNoSuper()"
+           [matTooltip]="esAdminNoSuper() ? 'No tienes permiso para esta accion' : ''"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon>directions_car</mat-icon>
+          <span matListItemTitle>
+            Registrar Vehiculo
+            <span *ngIf="esAdminNoSuper()" class="lock-icon">🔒</span>
+          </span>
+        </a>
+
+        <a mat-list-item
+           routerLink="/lista-activos"
+           routerLinkActive="active-link">
+          <mat-icon matListItemIcon>group</mat-icon>
+          <span matListItemTitle>Actualmente Dentro</span>
+        </a>
+
+        <a mat-list-item
+           routerLink="/historial"
+           routerLinkActive="active-link">
+          <mat-icon matListItemIcon>history</mat-icon>
+          <span matListItemTitle>Historial</span>
+        </a>
+
+      </mat-nav-list>
+
+      <!-- MENU ADMIN -->
+      <ng-container *ngIf="authService.isAdmin()">
+        <mat-divider></mat-divider>
+        <p class="menu-section-title">Administracion</p>
+        <mat-nav-list>
+
+          <a mat-list-item
+             [routerLink]="esAdminNoSuper() ? null : '/usuarios'"
+             routerLinkActive="active-link"
+             [class.menu-disabled]="esAdminNoSuper()"
+             [matTooltip]="esAdminNoSuper() ? 'No tienes permiso para esta accion' : ''"
+             matTooltipPosition="right">
+            <mat-icon matListItemIcon>manage_accounts</mat-icon>
+            <span matListItemTitle>
+              Gestion de Usuarios
+              <span *ngIf="esAdminNoSuper()" class="lock-icon">🔒</span>
+            </span>
+          </a>
+
+        </mat-nav-list>
+      </ng-container>
+
+      <!-- MENU SUPERADMIN -->
+      <ng-container *ngIf="authService.isSuperAdmin()">
+        <p class="menu-section-title">Super Admin</p>
+        <mat-nav-list>
+          <a mat-list-item *ngFor="let item of menuSuperAdmin"
+             [routerLink]="item.route"
+             routerLinkActive="active-link">
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+          </a>
+        </mat-nav-list>
+      </ng-container>
+
+      <!-- CERRAR SESION -->
+      <div class="sidenav-footer">
+        <button mat-stroked-button (click)="logout()" class="btn-logout">
+          <mat-icon>logout</mat-icon> Cerrar Sesion
+        </button>
+      </div>
+
+    </mat-sidenav>
+
+    <mat-sidenav-content>
+      <div class="layout-wrapper">
+        <mat-toolbar color="primary" class="toolbar">
+          <button mat-icon-button (click)="drawer.toggle()">
+            <mat-icon>menu</mat-icon>
+          </button>
+          <span>{{ title }}</span>
+          <span class="toolbar-edificio"
+                *ngIf="!authService.isSuperAdmin() && authService.edificioId()">
+            <mat-icon style="font-size:16px; vertical-align:middle;">apartment</mat-icon>
+            {{ edificioService.getNombreEdificio(authService.edificioId() || '') }}
+          </span>
+        </mat-toolbar>
+        <div class="content-area">
+          <router-outlet></router-outlet>
+        </div>
+      </div>
+    </mat-sidenav-content>
+
+  </mat-sidenav-container>
+</ng-container>
+
+<ng-template #soloContenido>
+  <router-outlet></router-outlet>
+</ng-template>

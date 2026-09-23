@@ -1,0 +1,132 @@
+.camara-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.camara-inicio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px dashed #90caf9;
+  border-radius: 12px;
+  width: 100%;
+  background: #e3f2fd;
+}
+
+.camara-hint {
+  font-size: 12px;
+  color: #666;
+  margin: 0;
+  text-align: center;
+}
+
+.camara-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #c62828;
+  background: #ffebee;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.camara-vivo {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+}
+
+.video {
+  width: 100%;
+  display: block;
+  border-radius: 12px;
+}
+
+.camara-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.camara-marco {
+  width: 200px;
+  height: 200px;
+  border: 3px solid rgba(255,255,255,0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 0 2000px rgba(0,0,0,0.3);
+}
+
+.camara-marco-face {
+  border-color: #00e676;
+  box-shadow: 0 0 0 2000px rgba(0,0,0,0.3),
+              0 0 20px rgba(0,230,118,0.5);
+  animation: pulse-face 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-face {
+  0%, 100% { box-shadow: 0 0 0 2000px rgba(0,0,0,0.3), 0 0 20px rgba(0,230,118,0.4); }
+  50%       { box-shadow: 0 0 0 2000px rgba(0,0,0,0.3), 0 0 40px rgba(0,230,118,0.8); }
+}
+
+.procesando-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.5);
+  color: white;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.camara-botones {
+  position: absolute;
+  bottom: 12px;
+  left: 0; right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.btn-capturar {
+  width: 64px !important;
+  height: 64px !important;
+  box-shadow: 0 0 0 4px white !important;
+}
+
+.foto-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.foto-img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 4px solid #1565c0;
+  box-shadow: 0 4px 16px rgba(21,101,192,0.3);
+}
+
+.foto-botones {
+  display: flex;
+  gap: 12px;
+}

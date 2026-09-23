@@ -1,0 +1,223 @@
+<div class="usuarios-container">
+
+  <div class="header-row">
+    <h2><mat-icon>manage_accounts</mat-icon> Gestion de Usuarios</h2>
+    <button mat-raised-button color="primary"
+            (click)="mostrarFormulario = !mostrarFormulario">
+      <mat-icon>{{ mostrarFormulario ? 'close' : 'person_add' }}</mat-icon>
+      {{ mostrarFormulario ? 'Cancelar' : 'Nuevo Usuario' }}
+    </button>
+  </div>
+
+  <!-- FORMULARIO -->
+  <mat-card *ngIf="mostrarFormulario" class="form-card">
+    <mat-card-header>
+      <mat-card-title>Crear Nuevo Usuario</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="formulario" (ngSubmit)="crearUsuario()">
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Nombre Completo *</mat-label>
+            <input matInput formControlName="nombre">
+            <mat-icon matSuffix>person</mat-icon>
+            <mat-error *ngIf="tieneError('nombre', 'required')">
+              Obligatorio
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Correo Electronico *</mat-label>
+            <input matInput formControlName="email" type="email">
+            <mat-icon matSuffix>email</mat-icon>
+            <mat-error *ngIf="tieneError('email', 'required')">
+              Obligatorio
+            </mat-error>
+            <mat-error *ngIf="tieneError('email', 'email')">
+              Correo invalido
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Contrasena *</mat-label>
+            <input matInput formControlName="password"
+                   [type]="verPassword ? 'text' : 'password'">
+            <button matSuffix mat-icon-button type="button"
+                    (click)="verPassword = !verPassword">
+              <mat-icon>
+                {{ verPassword ? 'visibility_off' : 'visibility' }}
+              </mat-icon>
+            </button>
+            <mat-error *ngIf="tieneError('password', 'minlength')">
+              Minimo 6 caracteres
+            </mat-error>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="half-width">
+            <mat-label>Rol *</mat-label>
+            <mat-select formControlName="rol">
+              <mat-option value="usuario">Usuario</mat-option>
+              <mat-option value="admin">Administrador</mat-option>
+              <mat-option value="superadmin" *ngIf="isSuperAdmin">
+                Super Admin
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <!-- Selector MULTIPLE para admins -->
+        <mat-form-field appearance="outline" class="full-width"
+                        *ngIf="formulario.get('rol')?.value === 'admin'">
+          <mat-label>
+            Edificios a cargo * (puedes seleccionar varios)
+          </mat-label>
+          <mat-select formControlName="edificiosIds" multiple>
+            <mat-option *ngFor="let e of edificios" [value]="e.id">
+              <mat-icon>apartment</mat-icon>
+              {{ e.nombre }} — {{ e.direccion }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>apartment</mat-icon>
+        </mat-form-field>
+
+        <!-- Selector SIMPLE para usuarios normales -->
+        <mat-form-field appearance="outline" class="full-width"
+                        *ngIf="formulario.get('rol')?.value === 'usuario'">
+          <mat-label>Edificio *</mat-label>
+          <mat-select formControlName="edificioId">
+            <mat-option *ngFor="let e of edificios" [value]="e.id">
+              <mat-icon>apartment</mat-icon>
+              {{ e.nombre }} — {{ e.direccion }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matSuffix>apartment</mat-icon>
+        </mat-form-field>
+
+        <div class="button-row">
+          <button type="submit" mat-raised-button color="primary"
+                  [disabled]="cargando">
+            <mat-icon>save</mat-icon> Crear Usuario
+          </button>
+        </div>
+
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- TABLA -->
+  <mat-card class="tabla-card">
+    <mat-card-content>
+      <table mat-table [dataSource]="usuarios" class="tabla-usuarios">
+
+        <ng-container matColumnDef="nombre">
+          <th mat-header-cell *matHeaderCellDef>Nombre</th>
+          <td mat-cell *matCellDef="let u">
+            <strong>{{ u.nombre }}</strong>
+            <br>
+            <span style="font-size:12px; color:#666">{{ u.email }}</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="rol">
+          <th mat-header-cell *matHeaderCellDef>Rol</th>
+          <td mat-cell *matCellDef="let u">
+            <mat-chip
+              [color]="u.rol === 'superadmin' ? 'warn' :
+                       u.rol === 'admin' ? 'primary' : 'accent'"
+              highlighted>
+              {{ u.rol | titlecase }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="edificios">
+          <th mat-header-cell *matHeaderCellDef>Edificio(s)</th>
+          <td mat-cell *matCellDef="let u">
+
+            <!-- Admin: selector multiple (solo superadmin puede cambiar) -->
+            <mat-select *ngIf="u.rol === 'admin' && isSuperAdmin"
+                        [value]="u.edificiosIds || []"
+                        multiple
+                        (selectionChange)="cambiarEdificios(u.uid, $event.value)"
+                        class="edificio-select">
+              <mat-option *ngFor="let e of edificios" [value]="e.id">
+                {{ e.nombre }}
+              </mat-option>
+            </mat-select>
+
+            <!-- Admin: solo lectura si no es superadmin -->
+            <span *ngIf="u.rol === 'admin' && !isSuperAdmin">
+              {{ getNombresEdificios(u.edificiosIds || []) }}
+            </span>
+
+            <!-- Usuario: selector simple (solo superadmin puede cambiar) -->
+            <mat-select *ngIf="u.rol === 'usuario' && isSuperAdmin"
+                        [value]="u.edificioId"
+                        (selectionChange)="cambiarEdificio(u.uid, $event.value)"
+                        class="edificio-select">
+              <mat-option *ngFor="let e of edificios" [value]="e.id">
+                {{ e.nombre }}
+              </mat-option>
+            </mat-select>
+
+            <!-- Usuario: solo lectura si no es superadmin -->
+            <span *ngIf="u.rol === 'usuario' && !isSuperAdmin">
+              {{ edificioService.getNombreEdificio(u.edificioId || '') }}
+            </span>
+
+            <!-- Superadmin sin edificio -->
+            <span *ngIf="u.rol === 'superadmin'"
+                  style="color:#999; font-size:12px;">
+              Todos los edificios
+            </span>
+
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="activo">
+          <th mat-header-cell *matHeaderCellDef>Estado</th>
+          <td mat-cell *matCellDef="let u">
+            <mat-chip [color]="u.activo ? 'primary' : 'warn'" highlighted>
+              {{ u.activo ? 'Activo' : 'Inactivo' }}
+            </mat-chip>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="acciones">
+          <th mat-header-cell *matHeaderCellDef>Acciones</th>
+          <td mat-cell *matCellDef="let u">
+            <div class="acciones-row">
+              <button mat-icon-button
+                      [color]="u.activo ? 'warn' : 'primary'"
+                      (click)="toggleActivo(u)"
+                      [matTooltip]="u.activo ? 'Desactivar' : 'Activar'">
+                <mat-icon>{{ u.activo ? 'block' : 'check_circle' }}</mat-icon>
+              </button>
+              <button mat-icon-button color="warn"
+                      (click)="eliminarUsuario(u.uid, u.nombre)"
+                      matTooltip="Eliminar">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="columnas"></tr>
+        <tr mat-row *matRowDef="let row; columns: columnas;"></tr>
+
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell" [attr.colspan]="columnas.length"
+              style="text-align:center; padding:40px; color:#999">
+            <mat-icon style="font-size:48px; display:block; margin:0 auto 12px">
+              people_outline
+            </mat-icon>
+            No hay usuarios registrados
+          </td>
+        </tr>
+
+      </table>
+    </mat-card-content>
+  </mat-card>
+
+</div>

@@ -1,0 +1,292 @@
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.full-width  { width: 100%; }
+.half-width  { flex: 1; min-width: 220px; }
+
+/* ===== SECCION RECONOCIMIENTO ===== */
+.seccion-reconocimiento {
+  background: linear-gradient(135deg, #e3f2fd, #f0f7ff);
+  border: 1px solid #90caf9;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 8px;
+}
+
+.seccion-titulo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  color: #1565c0;
+  margin-bottom: 8px;
+}
+
+.seccion-titulo mat-icon { color: #1565c0; }
+
+.seccion-desc {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 16px;
+}
+
+.btn-reconocimiento {
+  width: 100%;
+  height: 48px;
+  font-size: 14px !important;
+}
+
+/* ===== ALERTA YA ESTA ADENTRO ===== */
+.alert-adentro {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background-color: #fff3e0;
+  border-left: 4px solid #f57c00;
+  padding: 14px 16px;
+  border-radius: 4px;
+  margin: 12px 0;
+  color: #e65100;
+}
+
+.alert-adentro mat-icon {
+  color: #f57c00;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  margin-top: 2px;
+}
+
+.alert-adentro strong {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.alert-adentro p {
+  margin: 0;
+  font-size: 13px;
+  color: #bf360c;
+}
+
+/* ===== SEPARADOR ===== */
+.separador-seccion {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: #999;
+  font-size: 13px;
+}
+
+.separador-seccion::before,
+.separador-seccion::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+/* ===== BUSQUEDA CEDULA ===== */
+.busqueda-cedula {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.busqueda-cedula mat-form-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* ===== CAMARA BLOQUE ===== */
+.camara-bloque {
+  margin-top: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.camara-bloque-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  font-size: 13px;
+  color: #555;
+}
+
+.camara-bloque-header button { margin-left: auto; }
+
+.camara-bloque app-camara {
+  display: block;
+  padding: 16px;
+}
+
+/* ===== RECONOCIENDO ===== */
+.reconociendo-msg {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #e8f5e9;
+  border-radius: 8px;
+  color: #2e7d32;
+  font-size: 14px;
+  margin-top: 12px;
+}
+
+/* ===== ALERTA DATOS ENCONTRADOS ===== */
+.alert-found {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #e8f5e9;
+  border-left: 4px solid #2e7d32;
+  padding: 10px 16px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  color: #2e7d32;
+  font-size: 14px;
+}
+
+.alert-found mat-icon { color: #2e7d32; }
+
+/* ===== FOTO SECTION ===== */
+.foto-section {
+  margin: 16px 0;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e0e0e0;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.foto-section.foto-requerida {
+  border-color: #f57c00;
+  background: #fff8f0;
+}
+
+.foto-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.foto-section-header h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #1565c0;
+  font-size: 14px;
+}
+
+.foto-requerida-badge {
+  background: #f57c00;
+  color: white;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: normal;
+}
+
+.aviso-foto {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #fff3e0;
+  border-left: 4px solid #f57c00;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #e65100;
+  margin-top: 8px;
+}
+
+.aviso-foto mat-icon { color: #f57c00; font-size: 20px; }
+
+.foto-actual {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.foto-thumb {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #1565c0;
+  box-shadow: 0 2px 8px rgba(21,101,192,0.2);
+}
+
+.foto-ok {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #2e7d32;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.foto-ok mat-icon { color: #2e7d32; font-size: 20px; }
+
+/* ===== BOTONES ===== */
+.button-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+/* ===== CARD ===== */
+mat-card {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+mat-card-header {
+  background: linear-gradient(135deg, #1565c0, #42a5f5);
+  color: white;
+  padding: 16px;
+  border-radius: 8px 8px 0 0;
+  margin: -16px -16px 16px -16px;
+}
+
+mat-card-title,
+mat-card-subtitle { color: white !important; }
+
+mat-card-header mat-icon {
+  color: white !important;
+  background: rgba(255,255,255,0.2);
+  border-radius: 50%;
+  padding: 8px;
+}
+
+/* Modal Alerta */
+.alerta-panel .mat-mdc-dialog-container,
+.alerta-panel .mat-mdc-dialog-surface {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+}

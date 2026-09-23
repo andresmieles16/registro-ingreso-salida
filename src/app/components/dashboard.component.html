@@ -1,0 +1,221 @@
+<div class="dashboard">
+
+  <!-- ENCABEZADO -->
+  <h1 style="font-size:1.8rem; font-weight:bold; color:#1565c0; margin-bottom:4px;">
+    <mat-icon style="vertical-align:middle; margin-right:8px;">dashboard</mat-icon>
+    Panel de Control
+  </h1>
+  <p style="color:#666; margin-bottom:4px;">
+    <mat-icon style="vertical-align:middle; font-size:16px;">calendar_today</mat-icon>
+    {{ hoy | date:'EEEE, d MMMM yyyy' }}
+  </p>
+  <!-- Nombre del edificio -->
+  <p style="color:#1565c0; font-weight:500; margin-bottom:24px;">
+    <mat-icon style="vertical-align:middle; font-size:16px;">apartment</mat-icon>
+    {{ getNombreEdificio() }}
+  </p>
+
+  <!-- TARJETAS -->
+  <div class="stats-grid">
+
+    <div class="stat-card personas">
+      <div class="stat-card-body">
+        <div class="stat-icon personas-icon">
+          <mat-icon>people</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ personasDentro }}</h2>
+          <p>Personas Dentro</p>
+        </div>
+      </div>
+      <div class="stat-bar"></div>
+    </div>
+
+    <div class="stat-card vehiculos">
+      <div class="stat-card-body">
+        <div class="stat-icon vehiculos-icon">
+          <mat-icon>directions_car</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ vehiculosDentro }}</h2>
+          <p>Vehiculos Dentro</p>
+        </div>
+      </div>
+      <div class="stat-bar"></div>
+    </div>
+
+    <div class="stat-card total">
+      <div class="stat-card-body">
+        <div class="stat-icon total-icon">
+          <mat-icon>today</mat-icon>
+        </div>
+        <div class="stat-info">
+          <h2>{{ registrosHoy.length }}</h2>
+          <p>Registros Hoy</p>
+        </div>
+      </div>
+      <div class="stat-bar"></div>
+    </div>
+
+  </div>
+
+  <!-- SELECTOR DE FECHA + DESCARGAS -->
+  <div class="descarga-card">
+
+    <div class="descarga-header">
+      <mat-icon style="color:#1565c0">download</mat-icon>
+      <h5>Descargar Reporte por Dia</h5>
+      <span class="edificio-badge">
+        <mat-icon style="font-size:14px; width:14px; height:14px;">apartment</mat-icon>
+        {{ getNombreEdificio() }}
+      </span>
+    </div>
+
+    <div class="descarga-body">
+
+      <mat-form-field appearance="outline" class="fecha-picker">
+        <mat-label>Selecciona el dia</mat-label>
+        <input matInput
+               [matDatepicker]="picker"
+               [(ngModel)]="fechaSeleccionada"
+               [max]="hoy">
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+
+      <div class="fecha-info">
+        <mat-icon>info_outline</mat-icon>
+        <span>
+          <strong>{{ registrosFechaSeleccionada.length }}</strong>
+          registro(s) para el
+          <strong>{{ fechaSeleccionada | date:'dd/MM/yyyy' }}</strong>
+        </span>
+      </div>
+
+      <div class="descarga-botones">
+        <button mat-raised-button class="btn-pdf"
+                (click)="descargarPDF()"
+                [disabled]="registrosFechaSeleccionada.length === 0">
+          <mat-icon>picture_as_pdf</mat-icon>
+          Descargar PDF
+        </button>
+
+        <button mat-raised-button class="btn-excel"
+                (click)="exportarExcel()"
+                [disabled]="registrosFechaSeleccionada.length === 0">
+          <mat-icon>table_view</mat-icon>
+          Exportar Excel
+        </button>
+      </div>
+
+      <div *ngIf="registrosFechaSeleccionada.length === 0" class="sin-registros">
+        <mat-icon>event_busy</mat-icon>
+        <span>No hay registros para esta fecha</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ACCIONES RAPIDAS -->
+  <div class="acciones-card">
+    <h5>
+      <mat-icon style="color:#f9a825;">bolt</mat-icon>
+      Acciones Rapidas
+    </h5>
+    <div class="acciones-botones">
+
+      <button mat-raised-button color="primary" routerLink="/registro-persona">
+        <mat-icon>person_add</mat-icon> Registrar Persona
+      </button>
+
+      <button mat-raised-button color="accent" routerLink="/registro-vehiculo">
+        <mat-icon>directions_car</mat-icon> Registrar Vehiculo
+      </button>
+
+      <button mat-raised-button routerLink="/lista-activos">
+        <mat-icon>group</mat-icon> Ver Activos
+      </button>
+
+      <button mat-raised-button routerLink="/historial">
+        <mat-icon>history</mat-icon> Ver Historial
+      </button>
+
+    </div>
+  </div>
+
+  <!-- TABLA REGISTROS DE HOY -->
+  <div class="tabla-card">
+    <div class="tabla-header">
+      <h5>
+        <mat-icon style="color:#1565c0;">schedule</mat-icon>
+        Registros de Hoy
+      </h5>
+      <span class="badge-count">{{ registrosHoy.length }}</span>
+    </div>
+
+    <div *ngIf="registrosHoy.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Foto</th>
+            <th>Tipo</th>
+            <th>Nombre / Placa</th>
+            <th>Documento</th>
+            <th>Motivo</th>
+            <th>Ingreso</th>
+            <th>Salida</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of registrosHoy">
+            <td>
+              <img *ngIf="r.foto" [src]="r.foto" alt="Foto"
+                   style="width:36px; height:36px; border-radius:50%;
+                          object-fit:cover; border:2px solid #1565c0;">
+              <mat-icon *ngIf="!r.foto"
+                        style="color:#ccc; font-size:36px;
+                               width:36px; height:36px;">
+                account_circle
+              </mat-icon>
+            </td>
+            <td>
+              <span class="badge-tipo"
+                    [class.badge-persona]="r.tipo === 'persona'"
+                    [class.badge-vehiculo]="r.tipo === 'vehiculo'">
+                {{ r.tipo | titlecase }}
+              </span>
+            </td>
+            <td><strong>{{ getNombre(r) }}</strong></td>
+            <td style="color:#666; font-size:13px;">
+              {{ r.tipo === 'persona' ? r.documento : r.conductor }}
+            </td>
+            <td style="color:#666; font-size:13px;">{{ r.motivo }}</td>
+            <td style="color:#666; font-size:13px;">
+              {{ r.horaIngreso | date:'HH:mm' }}
+            </td>
+            <td style="color:#666; font-size:13px;">
+              {{ r.horaSalida ? (r.horaSalida | date:'HH:mm') : '-' }}
+            </td>
+            <td>
+              <span class="badge-estado"
+                    [class.badge-dentro]="r.estado === 'dentro'"
+                    [class.badge-salio]="r.estado === 'fuera'">
+                {{ r.estado === 'dentro' ? 'Dentro' : 'Salio' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="registrosHoy.length === 0" class="empty-state">
+      <mat-icon>inbox</mat-icon>
+      <p>No hay registros hoy todavia</p>
+    </div>
+
+  </div>
+
+</div>
+

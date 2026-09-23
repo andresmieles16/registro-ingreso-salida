@@ -1,0 +1,75 @@
+.usuarios-container {
+  padding: 16px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.header-row h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #1565c0;
+}
+
+.form-card {
+  margin-bottom: 20px;
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.form-card mat-card-header {
+  background: linear-gradient(135deg, #1565c0, #42a5f5);
+  color: white;
+  padding: 16px;
+  border-radius: 8px 8px 0 0;
+  margin: -16px -16px 16px -16px;
+}
+
+.form-card mat-card-title { color: white !important; }
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.full-width  { width: 100%; }
+.half-width  { flex: 1; min-width: 220px; }
+
+.button-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.tabla-card {
+  border-radius: 8px !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1) !important;
+}
+
+.tabla-usuarios { width: 100%; }
+
+.tabla-usuarios .mat-mdc-header-cell {
+  background-color: #1565c0;
+  color: white;
+  font-weight: bold;
+}
+
+.tabla-usuarios .mat-mdc-row:nth-child(even) { background-color: #f5f5f5; }
+.tabla-usuarios .mat-mdc-row:hover { background-color: #e3f2fd; }
+
+.edificio-select { width: 160px; }
+
+.acciones-row {
+  display: flex;
+  gap: 4px;
+}

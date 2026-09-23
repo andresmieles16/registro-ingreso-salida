@@ -1,0 +1,64 @@
+<div class="camara-container">
+
+  <!-- Boton para abrir camara -->
+  <div *ngIf="!camaraActiva && !fotoCapturada" class="camara-inicio">
+    <button mat-raised-button color="primary" (click)="abrirCamara()">
+      <mat-icon>{{ modoReconocimiento ? 'face' : 'camera_alt' }}</mat-icon>
+      {{ modoReconocimiento ? 'Identificar por Cara' : 'Tomar Foto' }}
+    </button>
+    <p class="camara-hint">
+      {{ modoReconocimiento
+        ? 'Apunta la camara al rostro para identificar automaticamente'
+        : 'La foto quedara vinculada al registro' }}
+    </p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="error" class="camara-error">
+    <mat-icon>error_outline</mat-icon>
+    <span>{{ error }}</span>
+  </div>
+
+  <!-- Video en vivo -->
+  <div *ngIf="camaraActiva && !fotoCapturada" class="camara-vivo">
+    <video id="video-camara" autoplay playsinline class="video"></video>
+    <div class="camara-overlay">
+      <div class="camara-marco"
+           [class.camara-marco-face]="modoReconocimiento">
+      </div>
+    </div>
+    <div *ngIf="procesando" class="procesando-overlay">
+      <mat-spinner diameter="48" color="accent"></mat-spinner>
+      <p>Identificando...</p>
+    </div>
+    <div class="camara-botones">
+      <button mat-icon-button color="warn" (click)="detenerCamara()">
+        <mat-icon>close</mat-icon>
+      </button>
+      <button mat-fab color="primary"
+              (click)="capturarFoto()"
+              class="btn-capturar"
+              [disabled]="procesando">
+        <mat-icon>{{ modoReconocimiento ? 'face_retouching_natural' : 'camera' }}</mat-icon>
+      </button>
+      <div style="width:40px"></div>
+    </div>
+  </div>
+
+  <!-- Canvas oculto -->
+  <canvas id="canvas-foto" style="display:none"></canvas>
+
+  <!-- Vista previa -->
+  <div *ngIf="fotoCapturada" class="foto-preview">
+    <img [src]="fotoCapturada" alt="Foto capturada" class="foto-img">
+    <div class="foto-botones">
+      <button mat-stroked-button (click)="repetir()">
+        <mat-icon>refresh</mat-icon> Repetir
+      </button>
+      <button mat-raised-button color="primary" (click)="usarFoto()">
+        <mat-icon>check</mat-icon> Usar esta foto
+      </button>
+    </div>
+  </div>
+
+</div>
